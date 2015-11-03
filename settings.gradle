@@ -1,0 +1,5 @@
+include 'war'
+include 'persistence'
+include 'rest-api'
+include 'logic'
+
