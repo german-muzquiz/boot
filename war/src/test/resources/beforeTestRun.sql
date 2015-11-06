@@ -18,7 +18,7 @@ VALUES ('boot_webapp',
         NULL);
 
 
-
+-- Default user: admin/admin
 INSERT INTO USERS (ID, USERNAME, PASSWORD, ENABLED) VALUES ('9a820f3e-1b4a-45aa-b709-cda7957b1a75', 'admin', '$2a$10$D85xZKQe7AKfUWwL4altkOeYMSK/wf/eisYM7oAQoW6c42WCXlZta', 1);
 
 INSERT INTO AUTHORITIES (ID, USERNAME, AUTHORITY) VALUES ('dc93f50a-5ac7-46ae-91cf-b0d3a4d5adc5', 'admin', 'ROLE_ADMIN');

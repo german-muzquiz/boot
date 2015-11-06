@@ -7,11 +7,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 @RestController
@@ -26,12 +22,12 @@ public class UserController {
 
 
     @RequestMapping(method = RequestMethod.GET, params = "currentUser")
-    public @ResponseBody User getCurrentUser(@AuthenticationPrincipal User currentUser) {
+    public @ResponseBody OAuth2Authentication getCurrentUser(@AuthenticationPrincipal OAuth2Authentication currentUser) {
         return currentUser;
     }
 
 
-    @RequestMapping(value = "/password", method = RequestMethod.POST)
+    @RequestMapping(method = RequestMethod.POST, value = "/password")
     public @ResponseBody boolean changePassword(
             @RequestParam("oldPassword") CharSequence oldPassword,
             @RequestParam("newPassword") CharSequence newPassword) {
