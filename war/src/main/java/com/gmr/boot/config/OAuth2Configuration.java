@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -18,7 +19,6 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.R
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 
@@ -115,6 +115,17 @@ public class OAuth2Configuration {
             http
                     .authorizeRequests()
                     .antMatchers(Constants.API_PREFIX + "/user").hasRole("ADMIN");
+
+            // Anyone not authenticated can register itself in the system
+            http
+                    .authorizeRequests()
+                    .antMatchers(HttpMethod.POST, Constants.API_PREFIX + "/profile").anonymous();
+
+            // Any other usage of /profile endpoint needs the user to be authenticated
+            http
+                    .authorizeRequests()
+                    .antMatchers(Constants.API_PREFIX + "/profile/**").authenticated();
+
         }
 
     }

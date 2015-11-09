@@ -1,6 +1,8 @@
 package com.gmr.boot.config;
 
+import com.gmr.boot.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -10,7 +12,6 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.JdbcUserDetailsManager;
 
 import javax.sql.DataSource;
 
@@ -24,15 +25,18 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Autowired
     private DataSource dataSource;
 
+    @Autowired
+    @Qualifier("userService")
+    private UserService userService;
+
+
     /**
      * Setup a UserDetailsService that reads users and roles from predefined database tables.
      * Table schemas can be seen in {@link org.springframework.security.core.userdetails.jdbc.JdbcDaoImpl}
      */
     @Bean
     public UserDetailsService userDetailsService() {
-        JdbcUserDetailsManager jdbcUserDetailsManager = new JdbcUserDetailsManager();
-        jdbcUserDetailsManager.setDataSource(dataSource);
-        return jdbcUserDetailsManager;
+        return userService;
     }
 
     /**

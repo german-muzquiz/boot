@@ -1,23 +1,20 @@
 package com.gmr.boot.config;
 
 
+import com.github.springtestdbunit.annotation.DatabaseSetup;
 import com.gmr.boot.rest.Constants;
 import com.gmr.boot.test.AbstractIntegrationTest;
 import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.response.ResponseBodyExtractionOptions;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.jdbc.SqlGroup;
 
-import static com.jayway.restassured.RestAssured.given;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
-@SqlGroup({
-        @Sql(executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD, scripts = {"classpath:beforeTestRun.sql"}),
-        @Sql(executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, scripts = {"classpath:cleanup.sql"})})
-//@DatabaseSetup(value = "OAuth2ConfigurationTest.xml")
+import static com.jayway.restassured.RestAssured.*;
+import static org.junit.Assert.*;
+
+
+@DatabaseSetup("classpath:testdata/auth.xml")
 public class OAuth2ConfigurationTest extends AbstractIntegrationTest {
 
     @Before
@@ -59,7 +56,7 @@ public class OAuth2ConfigurationTest extends AbstractIntegrationTest {
      */
     @Test
     public void requestAccessTokenWrongPasswordAndFail() {
-        String response = given()
+        given()
                 .header("Authorization", "Basic Ym9vdF93ZWJhcHA6NTlkMTRmMDEtMzhkYS00MDFjLTgwMTQtYjZjMDM1NjI3MWM4")
                 .formParam("grant_type", "password")
                 .formParam("username", "admin")
@@ -68,8 +65,6 @@ public class OAuth2ConfigurationTest extends AbstractIntegrationTest {
                 .then()
                 .statusCode(400)
                 .extract().body().asString();
-
-        System.out.println(response);
     }
 
 
@@ -103,16 +98,13 @@ public class OAuth2ConfigurationTest extends AbstractIntegrationTest {
     public void accessTokenCanAccessProtectedResource() {
         String accessToken = authenticate();
 
-        ResponseBodyExtractionOptions body = given()
+        given()
                 .header("Authorization", "Bearer " + accessToken)
                 .queryParam("currentUser", true)
-                .get(Constants.API_PREFIX + "/user")
+                .get(Constants.API_PREFIX + "/profile")
                 .then()
                 .statusCode(200)
                 .extract().body();
-
-        System.out.println(body.asString());
-        assertEquals("admin", body.jsonPath().get("principal.username"));
     }
 
 
@@ -127,11 +119,13 @@ public class OAuth2ConfigurationTest extends AbstractIntegrationTest {
 
         // Change password
         given()
-                .formParam("oldPassword", "password")
+                .formParam("oldPassword", "admin")
                 .formParam("newPassword", newPassword)
                 .header("Authorization", "Bearer " + accessToken)
-                .post(Constants.API_PREFIX + "/user/password")
+                .post(Constants.API_PREFIX + "/profile/password")
                 .then()
+                .log()
+                .all()
                 .statusCode(200);
 
         // Test that new password works
@@ -143,26 +137,6 @@ public class OAuth2ConfigurationTest extends AbstractIntegrationTest {
                 .post("/oauth/token")
                 .then()
                 .statusCode(200);
-    }
-
-
-
-    //------------------------------------------------------------------------------------------------------------------
-    //------------------------------------------- Helper methods -------------------------------------------------------
-    //------------------------------------------------------------------------------------------------------------------
-
-    private String authenticate() {
-        ResponseBodyExtractionOptions body = given()
-                .header("Authorization", "Basic Ym9vdF93ZWJhcHA6NTlkMTRmMDEtMzhkYS00MDFjLTgwMTQtYjZjMDM1NjI3MWM4")
-                .formParam("grant_type", "password")
-                .formParam("username", "admin")
-                .formParam("password", "admin")
-                .post("/oauth/token")
-                .then()
-                .statusCode(200)
-                .extract().body();
-
-        return body.jsonPath().get("access_token");
     }
 
 }

@@ -1,9 +1,5 @@
 
 dependencies {
-    compile project (':persistence')
-    compile project (':common')
-    compile project (':logic')
-    compile('org.springframework.boot:spring-boot-starter-web')
     compile('org.springframework.cloud:spring-cloud-starter-oauth2')
 }
 
