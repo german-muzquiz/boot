@@ -5,14 +5,13 @@ import com.github.springtestdbunit.annotation.DatabaseSetup;
 import com.github.springtestdbunit.annotation.ExpectedDatabase;
 import com.github.springtestdbunit.assertion.DatabaseAssertionMode;
 import com.gmr.boot.domain.CredentialsUserProfile;
-import com.gmr.boot.rest.Constants;
+import com.gmr.boot.rest.RestConstants;
 import com.gmr.boot.test.AbstractIntegrationTest;
 import com.jayway.restassured.RestAssured;
 import org.junit.Before;
 import org.junit.Test;
 
-
-import static com.jayway.restassured.RestAssured.*;
+import static com.jayway.restassured.RestAssured.given;
 
 
 @DatabaseSetup("classpath:testdata/auth.xml")
@@ -33,8 +32,9 @@ public class ProfileControllerTest extends AbstractIntegrationTest {
         // Register
         given()
                 .header("Content-Type", "application/json")
+                .header("Authorization", "Basic Ym9vdF93ZWJhcHA6NTlkMTRmMDEtMzhkYS00MDFjLTgwMTQtYjZjMDM1NjI3MWM4")
                 .body(profile)
-                .post(Constants.API_PREFIX + "/profile")
+                .post(RestConstants.API_PREFIX + "/profile")
                 .then()
                 .log()
                 .all()
@@ -59,8 +59,9 @@ public class ProfileControllerTest extends AbstractIntegrationTest {
 
         given()
                 .header("Content-Type", "application/json")
+                .header("Authorization", "Basic Ym9vdF93ZWJhcHA6NTlkMTRmMDEtMzhkYS00MDFjLTgwMTQtYjZjMDM1NjI3MWM4")
                 .body(profile)
-                .post(Constants.API_PREFIX + "/profile")
+                .post(RestConstants.API_PREFIX + "/profile")
                 .then()
                 .log()
                 .all()
@@ -76,8 +77,9 @@ public class ProfileControllerTest extends AbstractIntegrationTest {
         // Create user
         given()
                 .header("Content-Type", "application/json")
+                .header("Authorization", "Basic Ym9vdF93ZWJhcHA6NTlkMTRmMDEtMzhkYS00MDFjLTgwMTQtYjZjMDM1NjI3MWM4")
                 .body(profile)
-                .post(Constants.API_PREFIX + "/profile")
+                .post(RestConstants.API_PREFIX + "/profile")
                 .then()
                 .log()
                 .all()
@@ -93,8 +95,9 @@ public class ProfileControllerTest extends AbstractIntegrationTest {
         // Create user
         given()
                 .header("Content-Type", "application/json")
+                .header("Authorization", "Basic Ym9vdF93ZWJhcHA6NTlkMTRmMDEtMzhkYS00MDFjLTgwMTQtYjZjMDM1NjI3MWM4")
                 .body(profile)
-                .post(Constants.API_PREFIX + "/profile")
+                .post(RestConstants.API_PREFIX + "/profile")
                 .then()
                 .log()
                 .all()
@@ -110,8 +113,9 @@ public class ProfileControllerTest extends AbstractIntegrationTest {
         // Create user
         given()
                 .header("Content-Type", "application/json")
+                .header("Authorization", "Basic Ym9vdF93ZWJhcHA6NTlkMTRmMDEtMzhkYS00MDFjLTgwMTQtYjZjMDM1NjI3MWM4")
                 .body(profile)
-                .post(Constants.API_PREFIX + "/profile")
+                .post(RestConstants.API_PREFIX + "/profile")
                 .then()
                 .log()
                 .all()
@@ -127,12 +131,48 @@ public class ProfileControllerTest extends AbstractIntegrationTest {
         // Create user
         given()
                 .header("Content-Type", "application/json")
+                .header("Authorization", "Basic Ym9vdF93ZWJhcHA6NTlkMTRmMDEtMzhkYS00MDFjLTgwMTQtYjZjMDM1NjI3MWM4")
                 .body(profile)
-                .post(Constants.API_PREFIX + "/profile")
+                .post(RestConstants.API_PREFIX + "/profile")
                 .then()
                 .log()
                 .all()
                 .statusCode(400);
+    }
+
+
+    @Test
+    @ExpectedDatabase(assertionMode = DatabaseAssertionMode.NON_STRICT_UNORDERED, value = "classpath:testdata/create_user_failed.xml")
+    public void registerUnknownClientAndFail() {
+        CredentialsUserProfile profile = new CredentialsUserProfile("testUser", "test@test.com", "otherPassword".toCharArray());
+
+        // Create user
+        given()
+                .header("Content-Type", "application/json")
+                .body(profile)
+                .post(RestConstants.API_PREFIX + "/profile")
+                .then()
+                .log()
+                .all()
+                .statusCode(401);
+    }
+
+
+    @Test
+    @ExpectedDatabase(assertionMode = DatabaseAssertionMode.NON_STRICT_UNORDERED, value = "classpath:testdata/create_user_failed.xml")
+    public void registerWrongClientCredentialsAndFail() {
+        CredentialsUserProfile profile = new CredentialsUserProfile("testUser", "test@test.com", "otherPassword".toCharArray());
+
+        // Create user
+        given()
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Basic Ym9vdF93ZWJhcHA6d3JvbmdQYXNzd29yZA==")
+                .body(profile)
+                .post(RestConstants.API_PREFIX + "/profile")
+                .then()
+                .log()
+                .all()
+                .statusCode(401);
     }
 
 }

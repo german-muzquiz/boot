@@ -2,7 +2,7 @@ package com.gmr.boot.config;
 
 
 import com.github.springtestdbunit.annotation.DatabaseSetup;
-import com.gmr.boot.rest.Constants;
+import com.gmr.boot.rest.RestConstants;
 import com.gmr.boot.test.AbstractIntegrationTest;
 import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.response.ResponseBodyExtractionOptions;
@@ -30,7 +30,7 @@ public class OAuth2ConfigurationTest extends AbstractIntegrationTest {
     public void accessForbiddenToProtectedResource() {
         given()
                 .queryParam("currentUser", true)
-                .get(Constants.API_PREFIX + "/user")
+                .get(RestConstants.API_PREFIX + "/user")
                 .then()
                 .statusCode(401);
     }
@@ -101,7 +101,7 @@ public class OAuth2ConfigurationTest extends AbstractIntegrationTest {
         given()
                 .header("Authorization", "Bearer " + accessToken)
                 .queryParam("currentUser", true)
-                .get(Constants.API_PREFIX + "/profile")
+                .get(RestConstants.API_PREFIX + "/profile")
                 .then()
                 .statusCode(200)
                 .extract().body();
@@ -122,7 +122,7 @@ public class OAuth2ConfigurationTest extends AbstractIntegrationTest {
                 .formParam("oldPassword", "admin")
                 .formParam("newPassword", newPassword)
                 .header("Authorization", "Bearer " + accessToken)
-                .post(Constants.API_PREFIX + "/profile/password")
+                .post(RestConstants.API_PREFIX + "/profile/password")
                 .then()
                 .log()
                 .all()

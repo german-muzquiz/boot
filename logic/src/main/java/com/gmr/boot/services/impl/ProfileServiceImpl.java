@@ -13,16 +13,24 @@ import com.gmr.boot.services.ServiceConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.codec.Base64;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.provider.ClientDetails;
+import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletRequest;
+import java.io.UnsupportedEncodingException;
 import java.nio.CharBuffer;
 import java.util.List;
 
@@ -44,6 +52,9 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private ClientDetailsService clientDetailsService;
 
 
 
@@ -67,7 +78,7 @@ public class ProfileServiceImpl implements ProfileService {
 
 
     @Override
-    public void register(CredentialsUserProfile profile) throws LogicException {
+    public void register(CredentialsUserProfile profile, HttpServletRequest request) throws LogicException {
 
         if (profile.getUsername() == null || profile.getUsername().isEmpty()) {
             throw new LogicException(HttpStatus.BAD_REQUEST, "Missing username");
@@ -79,6 +90,10 @@ public class ProfileServiceImpl implements ProfileService {
 
         if (!profile.getEmail().matches(".+@.+\\..+")) {
             throw new LogicException(HttpStatus.BAD_REQUEST, "Invalid email format: " + profile.getEmail());
+        }
+
+        if (!isValidClient(request)) {
+            throw new LogicException(HttpStatus.UNAUTHORIZED, "Invalid client credentials");
         }
 
         UserEntity userEntity = userRepository.findByUsername(profile.getUsername());
@@ -102,6 +117,65 @@ public class ProfileServiceImpl implements ProfileService {
         }
 
         userRepository.save(entity);
+    }
+
+    private boolean isValidClient(HttpServletRequest request) {
+        Authentication currentAuthentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(currentAuthentication instanceof AnonymousAuthenticationToken)) {
+            if (currentAuthentication.isAuthenticated() || isValidAuthentication(currentAuthentication)) {
+                return true;
+            }
+        }
+
+        String header = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if (header == null || !header.startsWith("Basic ")) {
+            return false;
+        }
+
+        String[] tokens;
+        try {
+            tokens = extractAndDecodeHeader(header);
+        } catch (UnsupportedEncodingException | BadCredentialsException anEx) {
+            return false;
+        }
+
+        UsernamePasswordAuthenticationToken authRequest =
+                new UsernamePasswordAuthenticationToken(tokens[0], tokens[1]);
+
+        return isValidAuthentication(authRequest);
+    }
+
+    private boolean isValidAuthentication(Authentication currentAuthentication) {
+        ClientDetails clientDetails = clientDetailsService.loadClientByClientId((String) currentAuthentication.getPrincipal());
+        return passwordEncoder.matches(
+                CharBuffer.wrap(((String) currentAuthentication.getCredentials()).toCharArray()),
+                clientDetails.getClientSecret());
+    }
+
+    /**
+     * Decodes the header into a username and password.
+     *
+     * @throws BadCredentialsException if the Basic header is not present or is not valid Base64
+     */
+    private String[] extractAndDecodeHeader(String header) throws UnsupportedEncodingException {
+
+        byte[] base64Token = header.substring("Basic ".length()).getBytes("UTF-8");
+        byte[] decoded;
+        try {
+            decoded = Base64.decode(base64Token);
+        } catch (IllegalArgumentException e) {
+            throw new BadCredentialsException("Failed to decode basic authentication token");
+        }
+
+        String token = new String(decoded, "UTF-8");
+
+        int delim = token.indexOf(":");
+
+        if (delim == -1) {
+            throw new BadCredentialsException("Invalid basic authentication token");
+        }
+        return new String[] {token.substring(0, delim), token.substring(delim + 1)};
     }
 
 

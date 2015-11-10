@@ -1,6 +1,6 @@
 package com.gmr.boot.config;
 
-import com.gmr.boot.rest.Constants;
+import com.gmr.boot.rest.RestConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -107,24 +107,25 @@ public class OAuth2Configuration {
         @Override
         public void configure(ResourceServerSecurityConfigurer resources) {
             resources
-                    .resourceId(Constants.API_RESOURCE_ID);
+                    .resourceId(RestConstants.API_RESOURCE_ID);
         }
 
         @Override
         public void configure(HttpSecurity http) throws Exception {
             http
                     .authorizeRequests()
-                    .antMatchers(Constants.API_PREFIX + "/user").hasRole("ADMIN");
+                    .antMatchers(RestConstants.API_PREFIX + "/user").hasRole("ADMIN");
 
-            // Anyone not authenticated can register itself in the system
+            // No user authentication needed for new users registering themselves, but manual client
+            // validation is needed (see ProfileService.register)
             http
                     .authorizeRequests()
-                    .antMatchers(HttpMethod.POST, Constants.API_PREFIX + "/profile").anonymous();
+                    .antMatchers(HttpMethod.POST, RestConstants.API_PREFIX + "/profile").anonymous();
 
             // Any other usage of /profile endpoint needs the user to be authenticated
             http
                     .authorizeRequests()
-                    .antMatchers(Constants.API_PREFIX + "/profile/**").authenticated();
+                    .antMatchers(RestConstants.API_PREFIX + "/profile/**").authenticated();
 
         }
 

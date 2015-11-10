@@ -3,23 +3,20 @@ package com.gmr.boot.rest.controllers;
 import com.gmr.boot.BootException;
 import com.gmr.boot.domain.CredentialsUserProfile;
 import com.gmr.boot.domain.UserProfile;
-import com.gmr.boot.rest.Constants;
+import com.gmr.boot.rest.RestConstants;
 import com.gmr.boot.services.ProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
 
 
 /**
  * Operations for a user's own profile.
  */
 @RestController
-@RequestMapping(value = Constants.API_PREFIX + "/profile")
+@RequestMapping(value = RestConstants.API_PREFIX + "/profile")
 public class ProfileController {
 
     @Autowired
@@ -28,8 +25,8 @@ public class ProfileController {
 
 
     @RequestMapping(method = RequestMethod.POST)
-    public @ResponseBody boolean register(@RequestBody CredentialsUserProfile user) throws BootException {
-        profileService.register(user);
+    public @ResponseBody boolean register(@RequestBody CredentialsUserProfile user, HttpServletRequest request) throws BootException {
+        profileService.register(user, request);
         return true;
     }
 
