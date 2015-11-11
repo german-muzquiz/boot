@@ -114,7 +114,7 @@ public class OAuth2Configuration {
         public void configure(HttpSecurity http) throws Exception {
             http
                     .authorizeRequests()
-                    .antMatchers(RestConstants.API_PREFIX + "/user").hasRole("ADMIN");
+                    .antMatchers(RestConstants.API_PREFIX + "/user/**").hasRole("ADMIN");
 
             // No user authentication needed for new users registering themselves, but manual client
             // validation is needed (see ProfileService.register)
