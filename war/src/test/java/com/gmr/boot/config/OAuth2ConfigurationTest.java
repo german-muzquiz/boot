@@ -45,7 +45,7 @@ public class OAuth2ConfigurationTest extends AbstractIntegrationTest {
                 .formParam("grant_type", "password")
                 .formParam("username", "admin")
                 .formParam("password", "admin")
-                .post("/oauth/token")
+                .post(RestConstants.TOKEN_ENDPOINT)
                 .then()
                 .statusCode(401);
     }
@@ -61,7 +61,7 @@ public class OAuth2ConfigurationTest extends AbstractIntegrationTest {
                 .formParam("grant_type", "password")
                 .formParam("username", "admin")
                 .formParam("password", "wrongPassword")
-                .post("/oauth/token")
+                .post(RestConstants.TOKEN_ENDPOINT)
                 .then()
                 .statusCode(400)
                 .extract().body().asString();
@@ -79,7 +79,7 @@ public class OAuth2ConfigurationTest extends AbstractIntegrationTest {
                 .formParam("grant_type", "password")
                 .formParam("username", "admin")
                 .formParam("password", "admin")
-                .post("/oauth/token")
+                .post(RestConstants.TOKEN_ENDPOINT)
                 .then()
                 .statusCode(200)
                 .extract().body();
@@ -134,9 +134,27 @@ public class OAuth2ConfigurationTest extends AbstractIntegrationTest {
                 .formParam("grant_type", "password")
                 .formParam("username", "admin")
                 .formParam("password", newPassword)
-                .post("/oauth/token")
+                .post(RestConstants.TOKEN_ENDPOINT)
                 .then()
                 .statusCode(200);
+    }
+
+
+    @Test
+    public void requestOptionsFromAccessTokenEndpoint() {
+        given()
+                .options(RestConstants.TOKEN_ENDPOINT)
+                .then()
+                .statusCode(200);
+    }
+
+
+    @Test
+    public void requestOptionsForAuthorizedEndpointAndFail() {
+        given()
+                .options(RestConstants.API_PREFIX + "/profile")
+                .then()
+                .statusCode(401);
     }
 
 }

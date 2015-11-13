@@ -8,4 +8,5 @@ public abstract class RestConstants {
     public static final String API_RESOURCE_ID = "api";
     public static final String API_PREFIX = "/" + API_RESOURCE_ID + "/" + API_VERSION;
 
+    public static final String TOKEN_ENDPOINT = "/oauth/token";
 }

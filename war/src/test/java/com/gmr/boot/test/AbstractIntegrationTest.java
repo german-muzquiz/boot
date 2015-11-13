@@ -2,6 +2,7 @@ package com.gmr.boot.test;
 
 import com.github.springtestdbunit.DbUnitTestExecutionListener;
 import com.gmr.boot.Application;
+import com.gmr.boot.rest.RestConstants;
 import com.jayway.restassured.response.ResponseBodyExtractionOptions;
 import org.junit.Rule;
 import org.junit.rules.TestRule;
@@ -54,7 +55,7 @@ public abstract class AbstractIntegrationTest {
                 .formParam("grant_type", "password")
                 .formParam("username", "admin")
                 .formParam("password", "admin")
-                .post("/oauth/token")
+                .post(RestConstants.TOKEN_ENDPOINT)
                 .then()
                 .statusCode(200)
                 .extract().body();
