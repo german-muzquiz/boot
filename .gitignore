@@ -62,3 +62,4 @@ npm-debug.log
 
 build
 frontend/report
+frontend/dist

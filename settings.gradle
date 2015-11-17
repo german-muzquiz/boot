@@ -3,4 +3,5 @@ include 'persistence'
 include 'rest-api'
 include 'logic'
 include 'common'
+include 'frontend'
 

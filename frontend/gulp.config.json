@@ -36,5 +36,5 @@
     "./src/content/images/**/*"
   ],
   "report": "./report/",
-  "build": "./build/"
+  "build": "./dist/"
 }
