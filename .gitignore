@@ -48,7 +48,6 @@ crashlytics.properties
 crashlytics-build.properties
 ### Gradle template
 .gradle
-build/
 
 # Ignore Gradle GUI config
 gradle-app.setting
@@ -60,3 +59,6 @@ db
 node_modules
 bower_components
 npm-debug.log
+
+build
+frontend/report
