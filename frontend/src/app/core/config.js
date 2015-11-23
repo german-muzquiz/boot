@@ -44,4 +44,19 @@
         // Configure the common exception handler
         exceptionHandlerProvider.configure(config.appErrorPrefix);
     }
+
+    core.run(configureAuth);
+
+    /* @ngInject */
+    function configureAuth($injector, sessionservice) {
+        $injector.get('$http').defaults.transformRequest = function(data, headersGetter) {
+            if (sessionservice.isLogged()) {
+                headersGetter()['Authorization'] = 'Bearer ' + sessionservice.getAccessToken();
+            }
+            if (data) {
+                return data;
+            }
+        };
+    }
+
 })();

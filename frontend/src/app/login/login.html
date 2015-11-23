@@ -1,0 +1,13 @@
+<div class="container">
+
+    <form class="form-login" ng-submit="vm.login()">
+        <h2 class="form-signin-heading">Login</h2>
+        <div class="alert alert-danger" role="alert" ng-show="vm.isLoginError">{{vm.loginErrorMessage}}</div>
+        <label for="inputUsername" class="sr-only">Email address</label>
+        <input type="text" id="inputUsername" class="form-control" placeholder="User name" required autofocus ng-model="vm.username">
+        <label for="inputPassword" class="sr-only">Password</label>
+        <input type="password" id="inputPassword" class="form-control" placeholder="Password" required ng-model="vm.password">
+        <button class="btn btn-lg btn-primary btn-block">Login</button>
+    </form>
+
+</div> <!-- /container -->

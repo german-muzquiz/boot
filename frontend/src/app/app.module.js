@@ -20,6 +20,7 @@
         /*
          * Feature areas
          */
+        'app.login',
         'app.avengers',
         'app.dashboard',
         'app.layout'
