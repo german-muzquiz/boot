@@ -21,7 +21,7 @@ gulp.task('help', plug.taskListing);
  * Lint the code, create coverage report, and a visualizer
  * @return {Stream}
  */
-gulp.task('analyze', function() {
+gulp.task('analyze', ['clean'], function() {
     log('Analyzing source with JSHint, JSCS, and Plato');
 
     var jshint = analyzejshint([].concat(paths.js, paths.specs));
@@ -36,7 +36,7 @@ gulp.task('analyze', function() {
  * Create $templateCache from the html templates
  * @return {Stream}
  */
-gulp.task('templatecache', function() {
+gulp.task('templatecache', ['clean'], function() {
     log('Creating an AngularJS $templateCache');
 
     return gulp
@@ -83,7 +83,7 @@ gulp.task('js', ['analyze', 'templatecache'], function() {
  * Copy the Vendor JavaScript
  * @return {Stream}
  */
-gulp.task('vendorjs', function() {
+gulp.task('vendorjs', ['clean'], function() {
     log('Bundling, minifying, and copying the Vendor JavaScript');
 
     return gulp.src(paths.vendorjs)
@@ -98,7 +98,7 @@ gulp.task('vendorjs', function() {
  * Minify and bundle the CSS
  * @return {Stream}
  */
-gulp.task('css', function() {
+gulp.task('css', ['clean'], function() {
     log('Bundling, minifying, and copying the app\'s CSS');
 
     return gulp.src(paths.css)
@@ -115,7 +115,7 @@ gulp.task('css', function() {
  * Minify and bundle the Vendor CSS
  * @return {Stream}
  */
-gulp.task('vendorcss', function() {
+gulp.task('vendorcss', ['clean'], function() {
     log('Compressing, bundling, copying vendor CSS');
 
     var vendorFilter = plug.filter(['**/*.css']);
@@ -133,7 +133,7 @@ gulp.task('vendorcss', function() {
  * Copy fonts
  * @return {Stream}
  */
-gulp.task('fonts', function() {
+gulp.task('fonts', ['clean'], function() {
     var dest = paths.build + 'fonts';
     log('Copying fonts');
     return gulp
@@ -145,7 +145,7 @@ gulp.task('fonts', function() {
  * Compress images
  * @return {Stream}
  */
-gulp.task('images', function() {
+gulp.task('images', ['clean'], function() {
     var dest = paths.build + 'content/images';
     log('Compressing, caching, and copying images');
     return gulp
@@ -166,31 +166,31 @@ gulp.task('rev-and-inject', ['js', 'vendorjs', 'css', 'vendorcss'], function() {
 
     var minified = paths.build + '**/*.min.*';
     var index = paths.client + 'index.html';
-    var minFilter = plug.filter(['**/*.min.*', '!**/*.map']);
-    var indexFilter = plug.filter(['index.html']);
+    var minFilter = plug.filter(['**/*.min.*', '!**/*.map'], {restore: true});
+    var indexFilter = plug.filter(['index.html'], {restore: true});
 
     var stream = gulp
-        // Write the revisioned files
+    // Write the revisioned files
         .src([].concat(minified, index)) // add all built min files and index.html
         .pipe(minFilter) // filter the stream to minified css and js
         .pipe(plug.rev()) // create files with rev's
         .pipe(gulp.dest(paths.build)) // write the rev files
-        .pipe(minFilter.restore()) // remove filter, back to original stream
+        .pipe(minFilter.restore) // remove filter, back to original stream
 
-    // inject the files into index.html
-    .pipe(indexFilter) // filter to index.html
-    .pipe(inject('content/vendor.min.css', 'inject-vendor'))
+        // inject the files into index.html
+        .pipe(indexFilter) // filter to index.html
+        .pipe(inject('content/vendor.min.css', 'inject-vendor'))
         .pipe(inject('content/all.min.css'))
         .pipe(inject('vendor.min.js', 'inject-vendor'))
         .pipe(inject('all.min.js'))
         .pipe(gulp.dest(paths.build)) // write the rev files
-    .pipe(indexFilter.restore()) // remove filter, back to original stream
+        .pipe(indexFilter.restore) // remove filter, back to original stream
 
-    // replace the files referenced in index.html with the rev'd files
-    .pipe(plug.revReplace()) // Substitute in new filenames
-    .pipe(gulp.dest(paths.build)) // write the index.html file changes
-    .pipe(plug.rev.manifest()) // create the manifest (must happen last or we screw up the injection)
-    .pipe(gulp.dest(paths.build)); // write the manifest
+        // replace the files referenced in index.html with the rev'd files
+        .pipe(plug.revReplace()) // Substitute in new filenames
+        .pipe(gulp.dest(paths.build)) // write the index.html file changes
+        .pipe(plug.rev.manifest()) // create the manifest (must happen last or we screw up the injection)
+        .pipe(gulp.dest(paths.build)); // write the manifest
 
     function inject(path, name) {
         var pathGlob = paths.build + path;
@@ -212,11 +212,6 @@ gulp.task('rev-and-inject', ['js', 'vendorjs', 'css', 'vendorcss'], function() {
  */
 gulp.task('build', ['rev-and-inject', 'images', 'fonts'], function() {
     log('Building the optimized app');
-
-    return gulp.src('').pipe(plug.notify({
-        onLast: true,
-        message: 'Deployed code!'
-    }));
 });
 
 /**
@@ -229,7 +224,7 @@ gulp.task('clean', function(cb) {
     log('Cleaning: ' + plug.util.colors.blue(paths.build));
 
     var delPaths = [].concat(paths.build, paths.report);
-    del(delPaths, cb);
+    return del(delPaths, cb);
 });
 
 /**

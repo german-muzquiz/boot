@@ -9,7 +9,7 @@ node {
     version = '4.2.2'
 
     // Version of npm to use.
-    npmVersion = '2.1.5'
+    npmVersion = '3.4.1'
 
     // Base URL for fetching node distributions (change if you have a mirror).
     distBaseUrl = 'https://nodejs.org/dist'
@@ -25,11 +25,8 @@ node {
     nodeModulesDir = file("${project.projectDir}")
 }
 
-// makes sure on each build that gulp is installed
-//gulp_build.dependsOn 'installGulp'
-
 // processes your package.json before running gulp build
-//gulp_build.dependsOn 'npmInstall'
+gulp_build.dependsOn 'npmInstall'
 
 // runs "gulp build" as part of your gradle build
 build.dependsOn gulp_build

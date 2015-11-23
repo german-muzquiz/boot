@@ -13,6 +13,6 @@
         /*
          * 3rd Party modules
          */
-        'ngplus'
+        'ngplus', 'ui.bootstrap'
     ]);
 })();
